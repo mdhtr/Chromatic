@@ -32,10 +32,6 @@ var puzzles = [
     "size": 3
   },
   {
-    "colorSetName": "soil",
-    "size": 3
-  },
-  {
     "colorSetName": "Opposites",
     "size": 3
   },
