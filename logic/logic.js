@@ -20,7 +20,7 @@ function choose(arr) {
 
 function isSolved(arr) {
     for (var i = 0; i < arr.length; i++) {
-        if (arr[i] != i) {
+        if (arr[i] !== i) {
             return false;
         }
     }
@@ -32,7 +32,7 @@ function isCorner(index, size) {
     // square
     index++;
     var end = size * size;
-    return index == 1 || index == size || index == end || index == (end - size + 1);
+    return index === 1 || index === size || index === end || index === (end - size + 1);
 }
 
 function generateRandomizedArray(size) {

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chromatic: A game about arranging colors</title>
+    <script src="logic/logic.js" type="application/javascript"></script>
+    <script src="resources/colors.js" type="application/javascript"></script>
+    <script src="resources/puzzles.js" type="application/javascript"></script>
+</head>
+<body style="background-color: white">
+<svg id="grid" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"></svg>
+
+<h1>Help</h1>
+<ul>
+    <li>Chromatic is a game about colors and how they relate to each other</li>
+    <li>Each level comes scambled and your goal is to fix the grid</li>
+    <li>The corner blocks are always correct so they can't move</li>
+    <li>Tap any two other blocks to swap their positions</li>
+    <li><del>If you are stuck press and hold this icon for a hint</del></li>
+    <li><del>Use them wisely, you only get 10 hints per day</del></li>
+    <li>That is it! Feel free to try and beat this tutorial level.</li>
+</ul>
+
+<script>
+/* from home qml*/
+//    var currentSet = 0;
+//    var colorSets = [
+//        generateInterpolatedArray(3, colors["Spellbound"])
+//    ];
+//
+
+/* draw a grid */
+var currentPuzzle = puzzles[0];
+var colorSetName = currentPuzzle.colorSetName;
+var colors = generateInterpolatedArray(3, colors[colorSetName]);
+var size = currentPuzzle.size;
+var puzzleSize = size;
+var tileSize = 100;
+var boardSize = puzzleSize * tileSize;
+
+/* from gamegrid qml*/
+    var indexMap;
+    var startingIndexMap;
+    var selectedSquare = null;
+//    var hinting = false;
+//    var showCornerHints = hinting;
+//    var hintOpacity = 0.8;
+//    var enabled = true;
+//    var columns = size;
+//    var rows = size;
+//    var spacing = 0;
+
+function initialiseLevel() {
+    // example indexMaps for testing:
+//    indexMap = [0, 1, 2, 3, 4, 5, 6, 7, 8]; // in order
+//    indexMap = [0, 3, 2, 1, 7, 4, 6, 5, 8]; // random
+    indexMap = generateRandomizedArray(size);
+    startingIndexMap = indexMap;
+}
+//function resetLevel() {
+//    indexMap = startingIndexMap;
+//}
+function swapIndexes(a, b) {
+    var arr = indexMap.slice();
+    swap(arr, a, b);
+    return arr;
+}
+function onSquareSelected(square) {
+    var squareIndex = indexMap.indexOf(colors.indexOf(square.getAttribute('fill')));
+    if (square === selectedSquare) {
+        // Deselect currently selected square
+//        selectedSquare.selected = false;
+        selectedSquare = null;
+    } else if (!isCorner(squareIndex, size)) {
+        if (selectedSquare === null) {
+            // Select a new first square
+//            square.selected = true;
+            selectedSquare = square;
+        } else {
+            // Execute a swap
+            var selectedSquareIndex = indexMap.indexOf(colors.indexOf(selectedSquare.getAttribute('fill')));
+            indexMap = swapIndexes(selectedSquareIndex, squareIndex);
+            drawSwap(selectedSquare, square);
+//            selectedSquare.selected = false;
+            selectedSquare = null;
+            // onIndexMapChanged = isSolved(indexMap) ? solved() : moved();
+            if (isSolved(indexMap)) {
+                console.log("Congratulations! Puzzle solved!");
+            }
+        }
+    }
+}
+
+/* draw a grid */
+function drawGrid() {
+    var svgTag = document.getElementById("grid");
+    svgTag.setAttribute('version', '1.1');
+    svgTag.setAttribute('preserveAspectRatio', 'xMinYMin slice');
+    svgTag.setAttribute('width', boardSize);
+    svgTag.setAttribute('height', boardSize);
+    svgTag.setAttribute('viewBox', '0 0 ' + boardSize + ' ' + boardSize);
+
+    for (var i = 0; i < colors.length; i++) {
+        var itemOnPosition = indexMap[i];
+        var xPosition = Math.floor(i / puzzleSize);
+        var yPosition = i % puzzleSize;
+
+        var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', xPosition * tileSize);
+        rect.setAttribute('y', yPosition * tileSize);
+        rect.setAttribute('width', tileSize);
+        rect.setAttribute('height', tileSize);
+        rect.setAttribute('fill', colors[itemOnPosition]);
+        rect.addEventListener("click", function(e) {
+            onSquareSelected(this);
+        });
+
+        svgTag.appendChild(rect);
+    }
+}
+
+function drawSwap(a, b) {
+    var tempX = a.getAttribute('x');
+    var tempY = a.getAttribute('y');
+    a.setAttribute('x', b.getAttribute('x'));
+    a.setAttribute('y', b.getAttribute('y'));
+    b.setAttribute('x', tempX);
+    b.setAttribute('y', tempY);
+}
+
+initialiseLevel();
+drawGrid();
+</script>
+</body>
+</html>
